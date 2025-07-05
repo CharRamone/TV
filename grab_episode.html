@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #fafafa;
+        }
+
+        label,
+        input,
+        select,
+        button {
+            font-size: 1.1em;
+            margin: 0.5em 0;
+            display: block;
+        }
+
+        iframe {
+            width: 100%;
+            height: 600px;
+            border: none;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>111movies Embed Player</h1>
+
+    <label for="typeSelect">Content Type:</label>
+    <select id="typeSelect">
+        <option value="movie">Movie</option>
+        <option value="tv">TV Show Episode</option>
+    </select>
+
+    <label for="idInput">ID (IMDb or TMDb):</label>
+    <input type="text" id="idInput" placeholder="e.g., tt6263850 or 66732" />
+
+    <div id="tvInputs" style="display:none;">
+        <label for="seasonInput">Season Number:</label>
+        <input type="number" id="seasonInput" value="1" min="1" />
+
+        <label for="episodeInput">Episode Number:</label>
+        <input type="number" id="episodeInput" value="1" min="1" />
+    </div>
+
+    <button id="loadBtn">Load Content</button>
+
+    <iframe id="contentFrame" src="" allowfullscreen></iframe>
+
+    <script>
+        const typeSelect = document.getElementById('typeSelect');
+        const tvInputs = document.getElementById('tvInputs');
+        const idInput = document.getElementById('idInput');
+        const seasonInput = document.getElementById('seasonInput');
+        const episodeInput = document.getElementById('episodeInput');
+        const contentFrame = document.getElementById('contentFrame');
+
+        // Toggle TV season/episode inputs based on content type
+        typeSelect.addEventListener('change', () => {
+            if (typeSelect.value === 'tv') {
+                tvInputs.style.display = 'block';
+            } else {
+                tvInputs.style.display = 'none';
+            }
+        });
+
+        document.getElementById('loadBtn').addEventListener('click', () => {
+            const type = typeSelect.value;
+            const id = idInput.value.trim();
+            if (!id) {
+                alert('Please enter an ID!');
+                return;
+            }
+
+            let url = '';
+            if (type === 'movie') {
+                // Movie URL format
+                url = `https://111movies.com/movie/${id}`;
+            } else {
+                // TV show URL format
+                const season = seasonInput.value.trim();
+                const episode = episodeInput.value.trim();
+                if (!season || !episode) {
+                    alert('Please enter season and episode numbers!');
+                    return;
+                }
+                url = `https://111movies.com/tv/${id}/${season}/${episode}`;
+            }
+
+            contentFrame.src = url;
+        });
+
+        // Initialize inputs display on page load
+        typeSelect.dispatchEvent(new Event('change'));
+    </script>
+
+</body>
+
+</html>
