@@ -119,6 +119,23 @@ body.dark #tvSelectorUI { background:#ccc; }
 <script>
 const FAVORITES_KEY = "moviePlayerFavorites";
 
+/* =============================
+   DEFAULT TV SHOWS
+============================= */
+const DEFAULT_TV_SHOWS = [
+    { title: "How I Met Your Mother", id: "tt0460649" },
+    { title: "Brooklyn Nine-Nine", id: "tt2467372" },
+    { title: "Friends", id: "tt0108778" },
+    { title: "The Rookie", id: "tt7587890" },
+    { title: "The Office", id: "tt0386676" },
+    { title: "The Big Bang Theory", id: "tt0898266" },
+    { title: "The Flash", id: "tt3107288" },
+    { title: "Arrow", id: "tt2193021" }
+];
+
+/* =============================
+   ELEMENTS
+============================= */
 const typeSelect = document.getElementById("typeSelect");
 const tvInputs = document.getElementById("tvInputs");
 const idInput = document.getElementById("idInput");
@@ -141,12 +158,32 @@ const playEpisodeBtn = document.getElementById("playEpisodeBtn");
 let currentImdbId = null;
 let allEpisodes = [];
 
-// Toggle TV inputs
+/* =============================
+   INITIALIZE DEFAULT FAVORITES
+============================= */
+function initializeDefaultFavorites() {
+    const existing = JSON.parse(localStorage.getItem(FAVORITES_KEY));
+
+    if (!existing || existing.length === 0) {
+        const preloaded = DEFAULT_TV_SHOWS.map(show => ({
+            type: "tv",
+            id: show.id,
+            title: show.title
+        }));
+        localStorage.setItem(FAVORITES_KEY, JSON.stringify(preloaded));
+    }
+}
+
+/* =============================
+   TOGGLE TV INPUTS
+============================= */
 typeSelect.addEventListener("change", () => {
     tvInputs.style.display = typeSelect.value === "tv" ? "block" : "none";
 });
 
-// Build player URL
+/* =============================
+   BUILD PLAYER URL
+============================= */
 function buildUrl() {
     const type = typeSelect.value;
     const id = idInput.value.trim();
@@ -159,15 +196,18 @@ function buildUrl() {
     }
 }
 
-// Load content
+/* =============================
+   LOAD CONTENT
+============================= */
 loadBtn.addEventListener("click", () => {
     const url = buildUrl();
     if (url) contentFrame.src = url;
 });
 
-// Add favorite (FIXED: TV now shows real name)
+/* =============================
+   ADD FAVORITE
+============================= */
 addFavoriteBtn.addEventListener("click", async () => {
-
     const id = idInput.value.trim();
     if (!id) return;
 
@@ -198,7 +238,9 @@ addFavoriteBtn.addEventListener("click", async () => {
     loadFavorites();
 });
 
-// Load favorites
+/* =============================
+   LOAD FAVORITES
+============================= */
 function loadFavorites() {
     const favs = JSON.parse(localStorage.getItem(FAVORITES_KEY)) || [];
 
@@ -223,15 +265,34 @@ function loadFavorites() {
     });
 }
 
-// Clear favorites
+/* =============================
+   CLEAR FAVORITES (UPDATED)
+============================= */
 clearFavoritesBtn.addEventListener("click", () => {
-    if (confirm("Clear all favorites?")) {
+
+    if (!confirm("Are you sure you want to clear all favorites?")) return;
+
+    const replaceWithDefaults = confirm(
+        "Do you want to replace favorites with the default TV shows?"
+    );
+
+    if (replaceWithDefaults) {
+        const preloaded = DEFAULT_TV_SHOWS.map(show => ({
+            type: "tv",
+            id: show.id,
+            title: show.title
+        }));
+        localStorage.setItem(FAVORITES_KEY, JSON.stringify(preloaded));
+    } else {
         localStorage.removeItem(FAVORITES_KEY);
-        loadFavorites();
     }
+
+    loadFavorites();
 });
 
-// TVMaze functions
+/* =============================
+   TVMAZE FUNCTIONS
+============================= */
 async function getTvMazeIdFromImdb(imdbId) {
     const res = await fetch(`https://api.tvmaze.com/lookup/shows?imdb=${imdbId}`);
     if (!res.ok) return null;
@@ -292,11 +353,17 @@ playEpisodeBtn.addEventListener("click", () => {
     loadBtn.click();
 });
 
-// Dark mode
+/* =============================
+   DARK MODE
+============================= */
 document.getElementById("darkModeToggle").addEventListener("click", () => {
     document.body.classList.toggle("dark");
 });
 
+/* =============================
+   INIT
+============================= */
+initializeDefaultFavorites();
 loadFavorites();
 </script>
 
