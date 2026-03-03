@@ -1,40 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
+<meta charset="UTF-8">
 <title>111movies Player</title>
 <style>
 body {
     font-family: Arial, sans-serif;
-    padding: 20px;
-    background: #fafafa;
-    color: #222;
-    display: flex;
-    gap: 20px;
+    background:#111;
+    color:#eee;
+    display:flex;
+    gap:20px;
+    padding:20px;
 }
-body.dark { background:#121212; color:#eee; }
+body.dark { background:#fafafa; color:#222; }
 
 aside {
-    width:220px;
-    background:#eee;
+    width:240px;
+    background:#1e1e1e;
     padding:15px;
-    border-radius:8px;
-    max-height:700px;
-    overflow:auto;
+    border-radius:10px;
 }
-body.dark aside { background:#1f1f1f; }
+body.dark aside { background:#ddd; }
+
+h3 { margin-top:20px; }
 
 ul { list-style:none; padding:0; }
 li {
-    padding:6px;
+    padding:8px;
     margin-bottom:6px;
-    background:#ddd;
+    background:#333;
+    border-radius:6px;
+    cursor:pointer;
+}
+body.dark li { background:#bbb; }
+
+button {
+    padding:6px 12px;
+    margin-top:5px;
     border-radius:5px;
     cursor:pointer;
 }
-body.dark li { background:#333; }
 
 #mainContent { flex:1; }
+
 iframe {
     width:100%;
     height:600px;
@@ -42,8 +50,15 @@ iframe {
     margin-top:20px;
     background:black;
 }
-#tvSelectorUI { margin-top:20px; display:none; }
-button { padding:6px 12px; margin-top:5px; }
+
+#tvSelectorUI {
+    display:none;
+    margin-top:20px;
+    padding:15px;
+    background:#222;
+    border-radius:8px;
+}
+body.dark #tvSelectorUI { background:#ccc; }
 </style>
 </head>
 
@@ -55,6 +70,8 @@ button { padding:6px 12px; margin-top:5px; }
 
     <h3>TV Shows 📺</h3>
     <ul id="tvFavoritesList"></ul>
+
+    <button id="clearFavoritesBtn">🗑 Clear All Favorites</button>
 </aside>
 
 <section id="mainContent">
@@ -70,7 +87,7 @@ button { padding:6px 12px; margin-top:5px; }
 </select>
 
 <label>ID (IMDb):</label>
-<input type="text" id="idInput" placeholder="tt0903747" />
+<input type="text" id="idInput" placeholder="tt0903747">
 
 <div id="tvInputs" style="display:none;">
     <label>Season:</label>
@@ -107,10 +124,11 @@ const idInput = document.getElementById("idInput");
 const seasonInput = document.getElementById("seasonInput");
 const episodeInput = document.getElementById("episodeInput");
 const loadBtn = document.getElementById("loadBtn");
-const contentFrame = document.getElementById("contentFrame");
 const addFavoriteBtn = document.getElementById("addFavoriteBtn");
+const contentFrame = document.getElementById("contentFrame");
 const movieFavoritesList = document.getElementById("movieFavoritesList");
 const tvFavoritesList = document.getElementById("tvFavoritesList");
+const clearFavoritesBtn = document.getElementById("clearFavoritesBtn");
 
 const tvSelectorUI = document.getElementById("tvSelectorUI");
 const selectedShowTitle = document.getElementById("selectedShowTitle");
@@ -126,7 +144,7 @@ typeSelect.addEventListener("change", () => {
     tvInputs.style.display = typeSelect.value === "tv" ? "block" : "none";
 });
 
-// Load content
+// Build URL
 function buildUrl() {
     const type = typeSelect.value;
     const id = idInput.value.trim();
@@ -139,6 +157,7 @@ function buildUrl() {
     }
 }
 
+// Load content
 loadBtn.addEventListener("click", () => {
     const url = buildUrl();
     if (url) contentFrame.src = url;
@@ -189,7 +208,15 @@ function loadFavorites() {
     });
 }
 
-// TVMaze: lookup IMDb → TVMaze ID
+// Clear all favorites
+clearFavoritesBtn.addEventListener("click", () => {
+    if (confirm("Are you sure you want to clear all favorites?")) {
+        localStorage.removeItem(FAVORITES_KEY);
+        loadFavorites();
+    }
+});
+
+// TVMaze lookup
 async function getTvMazeIdFromImdb(imdbId) {
     const res = await fetch(`https://api.tvmaze.com/lookup/shows?imdb=${imdbId}`);
     if (!res.ok) return null;
@@ -197,21 +224,19 @@ async function getTvMazeIdFromImdb(imdbId) {
     return data.id;
 }
 
-// Fetch episodes
 async function fetchEpisodes(tvMazeId) {
     const res = await fetch(`https://api.tvmaze.com/shows/${tvMazeId}/episodes`);
     if (!res.ok) return [];
     return await res.json();
 }
 
-// Show selector
 async function showTvSelector(fav) {
     tvSelectorUI.style.display = "block";
     selectedShowTitle.textContent = fav.title;
     currentImdbId = fav.id;
 
     const tvMazeId = await getTvMazeIdFromImdb(fav.id);
-    if (!tvMazeId) return alert("Show not found on TVMaze");
+    if (!tvMazeId) return alert("Show not found.");
 
     allEpisodes = await fetchEpisodes(tvMazeId);
 
@@ -244,7 +269,6 @@ function loadEpisodesForSeason() {
 
 seasonDropdown.addEventListener("change", loadEpisodesForSeason);
 
-// Play selected episode
 playEpisodeBtn.addEventListener("click", () => {
     typeSelect.value = "tv";
     idInput.value = currentImdbId;
