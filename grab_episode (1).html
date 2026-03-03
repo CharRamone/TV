@@ -1,392 +1,214 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html>
 <head>
-    <meta charset="UTF-8" />
-    <style>
-        /* LIGHT MODE (default) */
-        body {
-            font-family: Arial, sans-serif;
-            padding: 20px;
-            background: #fafafa;
-            color: #222;
-            transition: background-color 0.3s, color 0.3s;
-            display: flex;
-            gap: 20px;
-            min-height: 100vh;
-        }
+<meta charset="UTF-8">
+<title>111movies Search Player</title>
+<style>
+body { font-family: Arial; background:#111; color:#eee; display:flex; gap:20px; padding:20px; }
+body.dark { background:#f5f5f5; color:#222; }
 
-        /* DARK MODE */
-        body.dark {
-            background: #121212;
-            color: #eee;
-        }
+aside { width:260px; background:#1e1e1e; padding:15px; border-radius:10px; }
+body.dark aside { background:#ddd; }
 
-        label,
-        input,
-        select,
-        button {
-            font-size: 1.1em;
-            margin: 0.5em 0;
-            display: block;
-        }
+ul { list-style:none; padding:0; }
+li { padding:8px; margin-bottom:6px; background:#333; border-radius:6px; cursor:pointer; }
+body.dark li { background:#bbb; }
 
-        iframe {
-            width: 100%;
-            height: 600px;
-            border: none;
-            margin-top: 20px;
-            background: black;
-        }
+button { padding:6px 12px; margin-top:8px; border-radius:6px; cursor:pointer; }
 
-        #loading {
-            display: none;
-            font-size: 1em;
-            color: #888;
-            margin-top: 10px;
-        }
+iframe { width:100%; height:600px; border:none; margin-top:20px; background:black; }
 
-        .button-group {
-            margin-top: 10px;
-        }
+#results { max-height:200px; overflow:auto; margin-top:8px; }
+.result { padding:6px; border-radius:4px; cursor:pointer; }
+.result:hover { background:rgba(255,255,255,0.15); }
 
-        button {
-            padding: 0.5em 1em;
-            cursor: pointer;
-        }
-
-        /* Favorites sidebar */
-        #favoritesSidebar {
-            width: 220px;
-            background: #eee;
-            border-radius: 8px;
-            padding: 15px;
-            overflow-y: auto;
-            max-height: 680px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            transition: background-color 0.3s, color 0.3s;
-        }
-
-        body.dark #favoritesSidebar {
-            background: #1f1f1f;
-            color: #ccc;
-        }
-
-        #favoritesSidebar h2 {
-            margin-top: 0;
-            font-size: 1.2em;
-        }
-
-        #favoritesList {
-            list-style: none;
-            padding-left: 0;
-            max-height: 520px;
-            overflow-y: auto;
-        }
-
-        #favoritesList li {
-            margin-bottom: 8px;
-            background: #ddd;
-            border-radius: 5px;
-            padding: 5px 8px;
-            cursor: pointer;
-            user-select: none;
-            transition: background-color 0.2s;
-        }
-
-        body.dark #favoritesList li {
-            background: #333;
-        }
-
-        #favoritesList li:hover {
-            background: #bbb;
-        }
-
-        body.dark #favoritesList li:hover {
-            background: #555;
-        }
-
-        #favoritesList li .removeBtn {
-            float: right;
-            color: red;
-            font-weight: bold;
-            cursor: pointer;
-            margin-left: 10px;
-        }
-
-        /* Main content area */
-        #mainContent {
-            flex-grow: 1;
-            max-width: 900px;
-        }
-
-        /* Dark mode toggle button */
-        #darkModeToggle {
-            margin-bottom: 15px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 1em;
-            padding: 0.5em 1em;
-        }
-
-        #darkModeToggle:hover {
-            background-color: #0056b3;
-        }
-    </style>
+#tvSelector { display:none; margin-top:20px; padding:15px; background:#222; border-radius:8px; }
+body.dark #tvSelector { background:#ccc; }
+</style>
 </head>
 
 <body>
 
-    <aside id="favoritesSidebar" aria-label="Favorites List">
-        <h2>Favorites ⭐</h2>
-        <ul id="favoritesList">
-            <!-- Favorite items will go here -->
-        </ul>
-    </aside>
+<aside>
+<h3>Movies 🎬</h3>
+<ul id="movieFavs"></ul>
 
-    <section id="mainContent">
-        <button id="darkModeToggle" aria-pressed="false">Switch to Dark Mode 🌙</button>
+<h3>TV Shows 📺</h3>
+<ul id="tvFavs"></ul>
 
-        <h1>111movies Embed Player</h1>
+<button id="clearFavs">Clear All</button>
+</aside>
 
-        <label for="typeSelect">Content Type:</label>
-        <select id="typeSelect" aria-label="Select content type">
-            <option value="movie">Movie</option>
-            <option value="tv">TV Show Episode</option>
-        </select>
+<div style="flex:1">
 
-        <label for="idInput">ID (IMDb or TMDb):</label>
-        <input type="text" id="idInput" autocomplete="off" placeholder="e.g., tt6263850 or 66732"
-            aria-label="Enter IMDb or TMDb ID" />
+<button onclick="document.body.classList.toggle('dark')">Toggle Dark Mode</button>
 
-        <div id="tvInputs" style="display:none;">
-            <label for="seasonInput">Season Number:</label>
-            <input type="number" id="seasonInput" value="1" min="1" aria-label="Enter season number" />
+<h2>Search</h2>
 
-            <label for="episodeInput">Episode Number:</label>
-            <input type="number" id="episodeInput" value="1" min="1" aria-label="Enter episode number" />
-        </div>
+<select id="typeSelect">
+<option value="movie">Movie</option>
+<option value="tv">TV Show</option>
+</select>
 
-        <div class="button-group">
-            <button id="loadBtn">Load Content</button>
-            <button id="addFavoriteBtn" title="Add current content to favorites">➕ Add to Favorites</button>
-        </div>
+<input id="searchInput" placeholder="Search title">
+<button id="searchBtn">Search</button>
 
-        <div id="loading">Loading content...</div>
+<div id="results"></div>
 
-        <iframe id="contentFrame" src="" allowfullscreen aria-label="Embedded content player"></iframe>
-    </section>
+<button id="loadBtn">Load</button>
+<button id="favBtn">Add to Favorites</button>
 
-    <script>
-        // Elements
-        const body = document.body;
-        const darkModeToggle = document.getElementById('darkModeToggle');
-        const typeSelect = document.getElementById('typeSelect');
-        const tvInputs = document.getElementById('tvInputs');
-        const idInput = document.getElementById('idInput');
-        const seasonInput = document.getElementById('seasonInput');
-        const episodeInput = document.getElementById('episodeInput');
-        const contentFrame = document.getElementById('contentFrame');
-        const loading = document.getElementById('loading');
-        const loadBtn = document.getElementById('loadBtn');
-        const addFavoriteBtn = document.getElementById('addFavoriteBtn');
-        const favoritesList = document.getElementById('favoritesList');
+<div id="tvSelector">
+<h3 id="tvTitle"></h3>
+<select id="seasonSelect"></select>
+<select id="episodeSelect"></select>
+<button id="playEpisode">Play Episode</button>
+</div>
 
-        // Toggle TV episode inputs visibility
-        function toggleTvInputs() {
-            tvInputs.style.display = typeSelect.value === 'tv' ? 'block' : 'none';
-        }
+<iframe id="player"></iframe>
 
-        typeSelect.addEventListener('change', () => {
-            toggleTvInputs();
-            saveSettings();
-        });
+</div>
 
-        // Auto-select "movie" if ID starts with 'tt'
-        idInput.addEventListener('input', () => {
-            const id = idInput.value.trim();
-            if (id.startsWith('tt')) {
-                typeSelect.value = 'movie';
-                toggleTvInputs();
-                saveSettings();
-            }
-        });
+<script>
+const TMDB_API_KEY = "a88916c7c4cb176a0f0caed0b298587a";
+const BASE = "https://api.themoviedb.org/3";
+const FAV_KEY = "tmdbPlayerFavs";
 
-        // Build embed URL
-        function buildUrl() {
-            const type = typeSelect.value;
-            const id = idInput.value.trim();
+const searchBtn = document.getElementById("searchBtn");
+const searchInput = document.getElementById("searchInput");
+const results = document.getElementById("results");
+const typeSelect = document.getElementById("typeSelect");
+const player = document.getElementById("player");
+const favBtn = document.getElementById("favBtn");
+const loadBtn = document.getElementById("loadBtn");
 
-            if (!id) {
-                alert('Please enter an ID!');
-                return null;
-            }
+const tvSelector = document.getElementById("tvSelector");
+const tvTitle = document.getElementById("tvTitle");
+const seasonSelect = document.getElementById("seasonSelect");
+const episodeSelect = document.getElementById("episodeSelect");
+const playEpisode = document.getElementById("playEpisode");
 
-            const isValidId = /^tt\d+$/.test(id) || /^\d+$/.test(id);
-            if (!isValidId) {
-                alert('Invalid ID format. Use IMDb (ttxxxxxx) or TMDb numeric ID.');
-                return null;
-            }
+let current = null;
+let currentIMDb = null;
 
-            if (type === 'movie') {
-                return `https://111movies.com/movie/${encodeURIComponent(id)}`;
-            } else {
-                const season = seasonInput.value.trim();
-                const episode = episodeInput.value.trim();
-                if (!season || !episode) {
-                    alert('Please enter season and episode numbers!');
-                    return null;
-                }
-                return `https://111movies.com/tv/${encodeURIComponent(id)}/${season}/${episode}`;
-            }
-        }
+async function tmdb(endpoint){
+    const res = await fetch(`${BASE}${endpoint}?api_key=${TMDB_API_KEY}`);
+    return res.json();
+}
 
-        // Load content in iframe
-        loadBtn.addEventListener('click', () => {
-            const url = buildUrl();
-            if (!url) return;
+searchBtn.onclick = async () => {
+    results.innerHTML="";
+    const query = searchInput.value.trim();
+    if(!query) return;
 
-            loading.style.display = 'block';
-            contentFrame.src = '';
-            loadBtn.disabled = true;
+    const data = await tmdb(`/search/${typeSelect.value}?query=${encodeURIComponent(query)}`);
+    data.results.forEach(item=>{
+        const div=document.createElement("div");
+        div.className="result";
+        div.textContent=item.title||item.name;
+        div.onclick=()=>selectItem(item);
+        results.appendChild(div);
+    });
+};
 
-            setTimeout(() => {
-                contentFrame.src = url;
-                loading.style.display = 'none';
-                loadBtn.disabled = false;
-                saveSettings();
-            }, 500);
-        });
+async function selectItem(item){
+    current=item;
+    results.innerHTML="";
+    tvSelector.style.display="none";
 
-        // Dark mode toggle
-        darkModeToggle.addEventListener('click', () => {
-            const dark = body.classList.toggle('dark');
-            darkModeToggle.textContent = dark ? 'Switch to Light Mode ☀️' : 'Switch to Dark Mode 🌙';
-            darkModeToggle.setAttribute('aria-pressed', dark);
-            localStorage.setItem('darkMode', dark);
-        });
+    const external = await tmdb(`/${typeSelect.value}/${item.id}/external_ids`);
+    currentIMDb = external.imdb_id;
+}
 
-        // Favorites storage key
-        const FAVORITES_KEY = 'moviePlayerFavorites';
+loadBtn.onclick = ()=>{
+    if(!currentIMDb) return alert("Search and select first");
+    if(typeSelect.value==="movie"){
+        player.src=`https://111movies.com/movie/${currentIMDb}`;
+    } else {
+        tvSelector.style.display="block";
+        loadTVSeasons();
+    }
+};
 
-        // Load favorites from localStorage
-        function loadFavorites() {
-            const favs = JSON.parse(localStorage.getItem(FAVORITES_KEY)) || [];
-            favoritesList.innerHTML = '';
-            favs.forEach((fav, index) => {
-                const li = document.createElement('li');
-                li.textContent = `${fav.type.toUpperCase()} - ${fav.id}${fav.type === 'tv' ? ` S${fav.season}E${fav.episode}` : ''}`;
+async function loadTVSeasons(){
+    tvTitle.textContent=current.name;
+    const data=await tmdb(`/tv/${current.id}`);
+    seasonSelect.innerHTML="";
+    data.seasons.filter(s=>s.season_number>0).forEach(s=>{
+        const opt=document.createElement("option");
+        opt.value=s.season_number;
+        opt.textContent="Season "+s.season_number;
+        seasonSelect.appendChild(opt);
+    });
+    loadEpisodes();
+}
 
-                // Click to load this favorite
-                li.addEventListener('click', () => {
-                    typeSelect.value = fav.type;
-                    idInput.value = fav.id;
-                    seasonInput.value = fav.season || '1';
-                    episodeInput.value = fav.episode || '1';
-                    toggleTvInputs();
-                    saveSettings();
-                    loadBtn.click();
-                });
+seasonSelect.onchange=loadEpisodes;
 
-                // Remove button
-                const removeBtn = document.createElement('span');
-                removeBtn.textContent = '✖';
-                removeBtn.className = 'removeBtn';
-                removeBtn.title = 'Remove from favorites';
-                removeBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    removeFavorite(index);
-                });
+async function loadEpisodes(){
+    const season=seasonSelect.value;
+    const data=await tmdb(`/tv/${current.id}/season/${season}`);
+    episodeSelect.innerHTML="";
+    data.episodes.forEach(e=>{
+        const opt=document.createElement("option");
+        opt.value=e.episode_number;
+        opt.textContent=`E${e.episode_number} - ${e.name}`;
+        episodeSelect.appendChild(opt);
+    });
+}
 
-                li.appendChild(removeBtn);
-                favoritesList.appendChild(li);
-            });
-        }
+playEpisode.onclick=()=>{
+    player.src=`https://111movies.com/tv/${currentIMDb}/${seasonSelect.value}/${episodeSelect.value}`;
+};
 
-        // Save favorites to localStorage
-        function saveFavorites(favs) {
-            localStorage.setItem(FAVORITES_KEY, JSON.stringify(favs));
-        }
+favBtn.onclick=()=>{
+    if(!currentIMDb) return;
+    const favs=JSON.parse(localStorage.getItem(FAV_KEY))||[];
+    if(favs.some(f=>f.imdb===currentIMDb)) return alert("Already added");
 
-        // Add current content to favorites
-        addFavoriteBtn.addEventListener('click', () => {
-            const id = idInput.value.trim();
-            const type = typeSelect.value;
-            if (!id) {
-                alert('Please enter an ID to add to favorites!');
-                return;
-            }
-            if (type === 'tv' && (!seasonInput.value.trim() || !episodeInput.value.trim())) {
-                alert('Please enter season and episode numbers to add to favorites!');
-                return;
-            }
+    favs.push({
+        type:typeSelect.value,
+        imdb:currentIMDb,
+        title:current.title||current.name,
+        tmdbId:current.id
+    });
+    localStorage.setItem(FAV_KEY,JSON.stringify(favs));
+    loadFavs();
+};
 
-            const newFav = {
-                type,
-                id,
-                season: type === 'tv' ? seasonInput.value.trim() : undefined,
-                episode: type === 'tv' ? episodeInput.value.trim() : undefined
-            };
+function loadFavs(){
+    const favs=JSON.parse(localStorage.getItem(FAV_KEY))||[];
+    movieFavs.innerHTML="";
+    tvFavs.innerHTML="";
+    favs.forEach(f=>{
+        const li=document.createElement("li");
+        li.textContent=f.title;
+        li.onclick=()=>playFav(f);
+        if(f.type==="movie") movieFavs.appendChild(li);
+        else tvFavs.appendChild(li);
+    });
+}
 
-            const favs = JSON.parse(localStorage.getItem(FAVORITES_KEY)) || [];
+function playFav(f){
+    if(f.type==="movie"){
+        player.src=`https://111movies.com/movie/${f.imdb}`;
+    } else {
+        currentIMDb=f.imdb;
+        current={id:f.tmdbId,name:f.title};
+        typeSelect.value="tv";
+        loadTVSeasons();
+    }
+}
 
-            // Prevent duplicates (same type, id, season, episode)
-            const exists = favs.some(fav =>
-                fav.type === newFav.type &&
-                fav.id === newFav.id &&
-                fav.season === newFav.season &&
-                fav.episode === newFav.episode
-            );
+clearFavs.onclick=()=>{
+    if(confirm("Clear all?")){
+        localStorage.removeItem(FAV_KEY);
+        loadFavs();
+    }
+};
 
-            if (exists) {
-                alert('This favorite already exists!');
-                return;
-            }
-
-            favs.push(newFav);
-            saveFavorites(favs);
-            loadFavorites();
-        });
-
-        // Remove favorite by index
-        function removeFavorite(index) {
-            const favs = JSON.parse(localStorage.getItem(FAVORITES_KEY)) || [];
-            favs.splice(index, 1);
-            saveFavorites(favs);
-            loadFavorites();
-        }
-
-        // Save current form settings to localStorage
-        function saveSettings() {
-            localStorage.setItem('lastType', typeSelect.value);
-            localStorage.setItem('lastId', idInput.value.trim());
-            localStorage.setItem('lastSeason', seasonInput.value);
-            localStorage.setItem('lastEpisode', episodeInput.value);
-        }
-
-        // Load settings from localStorage on page load
-        window.addEventListener('DOMContentLoaded', () => {
-            // Dark mode restore
-            const darkModeSaved = localStorage.getItem('darkMode') === 'true';
-            if (darkModeSaved) {
-                body.classList.add('dark');
-                darkModeToggle.textContent = 'Switch to Light Mode ☀️';
-                darkModeToggle.setAttribute('aria-pressed', true);
-            }
-
-            // Form restore
-            typeSelect.value = localStorage.getItem('lastType') || 'movie';
-            idInput.value = localStorage.getItem('lastId') || '';
-            seasonInput.value = localStorage.getItem('lastSeason') || '1';
-            episodeInput.value = localStorage.getItem('lastEpisode') || '1';
-            toggleTvInputs();
-
-            loadFavorites();
-        });
-    </script>
+loadFavs();
+</script>
 
 </body>
-
 </html>
