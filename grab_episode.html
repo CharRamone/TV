@@ -190,9 +190,9 @@ function buildUrl() {
     if (!id) return null;
 
     if (type === "movie") {
-        return `https://111movies.com/movie/${id}`;
+        return `https://vidsrc-embed.ru/embed/movie/${id}?autoplay=1`;
     } else {
-        return `https://111movies.com/tv/${id}/${seasonInput.value}/${episodeInput.value}`;
+        return `https://vidsrc-embed.ru/embed/tv?imdb=${id}&season=${seasonInput.value}&episode=${episodeInput.value}&autoplay=1&autonext=1`;
     }
 }
 
