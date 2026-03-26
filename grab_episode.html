@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>111movies Player</title>
+<title> The Flixer</title>
 <style>
 body {
     font-family: Arial, sans-serif;
@@ -79,7 +79,7 @@ body.dark #tvSelectorUI { background:#ccc; }
 
 <button id="darkModeToggle">Toggle Dark Mode</button>
 
-<h2>111movies Embed Player</h2>
+<h2>The Flixer </h2>
 
 <label>Type:</label>
 <select id="typeSelect">
@@ -190,9 +190,9 @@ function buildUrl() {
     if (!id) return null;
 
     if (type === "movie") {
-        return `https://vidsrc-embed.ru/embed/movie/${id}?autoplay=1`;
+        return `https://vidsrc-embed.ru/embed/movie/${id}`;
     } else {
-        return `https://vidsrc-embed.ru/embed/tv?imdb=${id}&season=${seasonInput.value}&episode=${episodeInput.value}&autoplay=1&autonext=1`;
+        return `https://vidsrc-embed.ru/embed/tv/${id}/${seasonInput.value}-${episodeInput.value}`;
     }
 }
 
