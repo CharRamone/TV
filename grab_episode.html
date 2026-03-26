@@ -190,12 +190,13 @@ function buildUrl() {
     if (!id) return null;
 
     if (type === "movie") {
-        return `https://vsembed.ru/embed/movie/${id}`;
+        return `https://vidcloud.stream/${id}.html`;
     } else {
-        return `https://vsembed.ru/embed/tv/${id}/${seasonInput.value}-${episodeInput.value}`;
+        const season = seasonInput.value;
+        const episode = episodeInput.value;
+        return `https://fsapi.xyz/tv-imdb/${id}-${season}-${episode}`;
     }
 }
-
 /* =============================
    LOAD CONTENT
 ============================= */
