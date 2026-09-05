@@ -1,0 +1,772 @@
+```html
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>1EMBED Search Player</title>
+
+<style>
+body {
+    font-family: Arial;
+    background: #111;
+    color: #eee;
+    display: flex;
+    gap: 20px;
+    padding: 20px;
+}
+
+body.dark {
+    background: #f5f5f5;
+    color: #222;
+}
+
+aside {
+    width: 260px;
+    background: #1e1e1e;
+    padding: 15px;
+    border-radius: 10px;
+}
+
+body.dark aside {
+    background: #ddd;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+}
+
+li {
+    padding: 8px;
+    margin-bottom: 6px;
+    background: #333;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+body.dark li {
+    background: #bbb;
+}
+
+button {
+    padding: 6px 12px;
+    margin-top: 8px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+input,
+select {
+    padding: 6px;
+    margin-top: 8px;
+    border-radius: 6px;
+}
+
+#playerContainer {
+    position: relative;
+    width: 100%;
+    padding-bottom: 56.25%;
+    height: 0;
+    margin-top: 20px;
+    background: black;
+}
+
+#player {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: black;
+}
+
+#results {
+    max-height: 200px;
+    overflow: auto;
+    margin-top: 8px;
+}
+
+.result {
+    padding: 6px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.result:hover {
+    background: rgba(255,255,255,0.15);
+}
+
+#tvSelector {
+    display: none;
+    margin-top: 20px;
+    padding: 15px;
+    background: #222;
+    border-radius: 8px;
+}
+
+body.dark #tvSelector {
+    background: #ccc;
+}
+
+#playerOptions {
+    margin-top: 20px;
+    padding: 15px;
+    background: #222;
+    border-radius: 8px;
+}
+
+body.dark #playerOptions {
+    background: #ccc;
+}
+
+.optionRow {
+    margin-bottom: 8px;
+}
+
+.optionRow label {
+    margin-right: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<aside>
+
+<h3>Movies 🎬</h3>
+<ul id="movieFavs"></ul>
+
+<h3>TV Shows 📺</h3>
+<ul id="tvFavs"></ul>
+
+<button id="clearFavs">Clear All</button>
+
+</aside>
+
+<div style="flex:1">
+
+<button id="darkModeBtn">Toggle Dark Mode</button>
+
+<h2>Search</h2>
+
+<select id="typeSelect">
+    <option value="movie">Movie</option>
+    <option value="tv">TV Show</option>
+</select>
+
+<input id="searchInput" placeholder="Search title">
+<button id="searchBtn">Search</button>
+
+<div id="results"></div>
+
+<button id="loadBtn">Load</button>
+<button id="favBtn">Add to Favorites</button>
+
+<div id="tvSelector">
+    <h3 id="tvTitle"></h3>
+
+    <select id="seasonSelect"></select>
+    <select id="episodeSelect"></select>
+
+    <button id="playEpisode">Play Episode</button>
+</div>
+
+<div id="playerOptions">
+
+    <h3>Player Options</h3>
+
+    <div class="optionRow">
+        <label for="colorInput">Player Color:</label>
+        <input
+            id="colorInput"
+            type="text"
+            value="dc2626"
+            placeholder="dc2626"
+        >
+    </div>
+
+    <div class="optionRow">
+        <label>
+            <input id="autoplayInput" type="checkbox">
+            Autoplay
+        </label>
+    </div>
+
+    <div class="optionRow">
+        <label>
+            <input id="autonextInput" type="checkbox" checked>
+            Auto-next Episode
+        </label>
+    </div>
+
+</div>
+
+<div id="playerContainer">
+    <iframe
+        id="player"
+        src=""
+        frameborder="0"
+        allowfullscreen
+        allow="encrypted-media"
+    ></iframe>
+</div>
+
+</div>
+
+<script>
+
+const TMDB_API_KEY = "a88916c7c4cb176a0f0caed0b298587a";
+const BASE = "https://api.themoviedb.org/3";
+const FAV_KEY = "tmdbPlayerFavs";
+
+const searchBtn = document.getElementById("searchBtn");
+const searchInput = document.getElementById("searchInput");
+const results = document.getElementById("results");
+const typeSelect = document.getElementById("typeSelect");
+const player = document.getElementById("player");
+const favBtn = document.getElementById("favBtn");
+const loadBtn = document.getElementById("loadBtn");
+
+const tvSelector = document.getElementById("tvSelector");
+const tvTitle = document.getElementById("tvTitle");
+const seasonSelect = document.getElementById("seasonSelect");
+const episodeSelect = document.getElementById("episodeSelect");
+const playEpisode = document.getElementById("playEpisode");
+
+const movieFavs = document.getElementById("movieFavs");
+const tvFavs = document.getElementById("tvFavs");
+const clearFavs = document.getElementById("clearFavs");
+
+const darkModeBtn = document.getElementById("darkModeBtn");
+
+const colorInput = document.getElementById("colorInput");
+const autoplayInput = document.getElementById("autoplayInput");
+const autonextInput = document.getElementById("autonextInput");
+
+let current = null;
+
+
+/* ------------------------------
+   TMDB API
+--------------------------------*/
+
+async function tmdb(endpoint) {
+
+    const separator = endpoint.includes("?") ? "&" : "?";
+
+    const res = await fetch(
+        `${BASE}${endpoint}${separator}api_key=${TMDB_API_KEY}`
+    );
+
+    if (!res.ok) {
+        throw new Error("TMDb request failed");
+    }
+
+    return res.json();
+}
+
+
+/* ------------------------------
+   PLAYER URL
+--------------------------------*/
+
+function getPlayerParams() {
+
+    const params = new URLSearchParams();
+
+    const color = colorInput.value.trim();
+
+    if (color) {
+        params.set(
+            "color",
+            color.replace("#", "")
+        );
+    }
+
+    params.set(
+        "autoplay",
+        autoplayInput.checked ? "1" : "0"
+    );
+
+    params.set(
+        "autonext",
+        autonextInput.checked ? "1" : "0"
+    );
+
+    return params.toString();
+}
+
+
+function buildMovieUrl(tmdbId) {
+
+    const params = getPlayerParams();
+
+    return `https://1embed.cc/embed/movie/${encodeURIComponent(tmdbId)}?${params}`;
+}
+
+
+function buildTvUrl(tmdbId, season, episode) {
+
+    const params = getPlayerParams();
+
+    return `https://1embed.cc/embed/tv/${encodeURIComponent(tmdbId)}/${encodeURIComponent(season)}/${encodeURIComponent(episode)}?${params}`;
+}
+
+
+/* ------------------------------
+   SEARCH
+--------------------------------*/
+
+searchBtn.onclick = async () => {
+
+    results.innerHTML = "";
+
+    const query = searchInput.value.trim();
+
+    if (!query) {
+        return;
+    }
+
+    try {
+
+        const data = await tmdb(
+            `/search/${typeSelect.value}?query=${encodeURIComponent(query)}`
+        );
+
+        if (!data.results || data.results.length === 0) {
+
+            results.textContent = "No results found.";
+
+            return;
+        }
+
+        data.results.forEach(item => {
+
+            const div = document.createElement("div");
+
+            div.className = "result";
+
+            const title = item.title || item.name || "Untitled";
+
+            const year =
+                (item.release_date || item.first_air_date || "")
+                .slice(0, 4);
+
+            div.textContent =
+                year
+                ? `${title} (${year})`
+                : title;
+
+            div.onclick = () => selectItem(item);
+
+            results.appendChild(div);
+
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        results.textContent = "Search failed.";
+
+    }
+
+};
+
+
+/* Press Enter to Search */
+
+searchInput.addEventListener("keydown", event => {
+
+    if (event.key === "Enter") {
+        searchBtn.click();
+    }
+
+});
+
+
+/* ------------------------------
+   SELECT SEARCH RESULT
+--------------------------------*/
+
+function selectItem(item) {
+
+    current = item;
+
+    results.innerHTML = "";
+
+    tvSelector.style.display = "none";
+
+    searchInput.value =
+        item.title ||
+        item.name ||
+        "";
+
+}
+
+
+/* ------------------------------
+   LOAD MOVIE / TV SHOW
+--------------------------------*/
+
+loadBtn.onclick = () => {
+
+    if (!current) {
+
+        alert("Search and select something first.");
+
+        return;
+
+    }
+
+    if (typeSelect.value === "movie") {
+
+        player.src = buildMovieUrl(current.id);
+
+    } else {
+
+        tvSelector.style.display = "block";
+
+        loadTVSeasons();
+
+    }
+
+};
+
+
+/* ------------------------------
+   LOAD TV SEASONS
+--------------------------------*/
+
+async function loadTVSeasons() {
+
+    if (!current) {
+        return;
+    }
+
+    tvTitle.textContent =
+        current.name ||
+        current.title ||
+        "TV Show";
+
+    try {
+
+        const data = await tmdb(`/tv/${current.id}`);
+
+        seasonSelect.innerHTML = "";
+
+        const seasons = data.seasons
+            .filter(season => season.season_number > 0);
+
+        seasons.forEach(season => {
+
+            const option = document.createElement("option");
+
+            option.value = season.season_number;
+
+            option.textContent =
+                "Season " + season.season_number;
+
+            seasonSelect.appendChild(option);
+
+        });
+
+        if (seasons.length) {
+
+            await loadEpisodes();
+
+        }
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert("Could not load seasons.");
+
+    }
+
+}
+
+
+/* ------------------------------
+   LOAD EPISODES
+--------------------------------*/
+
+seasonSelect.onchange = loadEpisodes;
+
+
+async function loadEpisodes() {
+
+    if (!current) {
+        return;
+    }
+
+    const season = seasonSelect.value;
+
+    try {
+
+        const data = await tmdb(
+            `/tv/${current.id}/season/${season}`
+        );
+
+        episodeSelect.innerHTML = "";
+
+        data.episodes.forEach(episode => {
+
+            const option =
+                document.createElement("option");
+
+            option.value =
+                episode.episode_number;
+
+            option.textContent =
+                `E${episode.episode_number} - ${episode.name}`;
+
+            episodeSelect.appendChild(option);
+
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert("Could not load episodes.");
+
+    }
+
+}
+
+
+/* ------------------------------
+   PLAY EPISODE
+--------------------------------*/
+
+playEpisode.onclick = () => {
+
+    if (!current) {
+        return;
+    }
+
+    const season = seasonSelect.value;
+    const episode = episodeSelect.value;
+
+    if (!season || !episode) {
+
+        alert("Select a season and episode.");
+
+        return;
+
+    }
+
+    player.src = buildTvUrl(
+        current.id,
+        season,
+        episode
+    );
+
+};
+
+
+/* ------------------------------
+   FAVORITES
+--------------------------------*/
+
+favBtn.onclick = () => {
+
+    if (!current) {
+
+        alert("Search and select something first.");
+
+        return;
+
+    }
+
+    const favs =
+        JSON.parse(
+            localStorage.getItem(FAV_KEY)
+        ) || [];
+
+    const exists = favs.some(f =>
+        f.type === typeSelect.value &&
+        Number(f.tmdbId) === Number(current.id)
+    );
+
+    if (exists) {
+
+        alert("Already added.");
+
+        return;
+
+    }
+
+    favs.push({
+
+        type: typeSelect.value,
+
+        title:
+            current.title ||
+            current.name,
+
+        tmdbId:
+            current.id
+
+    });
+
+    localStorage.setItem(
+        FAV_KEY,
+        JSON.stringify(favs)
+    );
+
+    loadFavs();
+
+};
+
+
+/* ------------------------------
+   DISPLAY FAVORITES
+--------------------------------*/
+
+function loadFavs() {
+
+    const favs =
+        JSON.parse(
+            localStorage.getItem(FAV_KEY)
+        ) || [];
+
+    movieFavs.innerHTML = "";
+    tvFavs.innerHTML = "";
+
+    favs.forEach(fav => {
+
+        const li =
+            document.createElement("li");
+
+        li.textContent =
+            fav.title;
+
+        li.onclick =
+            () => playFav(fav);
+
+        if (fav.type === "movie") {
+
+            movieFavs.appendChild(li);
+
+        } else {
+
+            tvFavs.appendChild(li);
+
+        }
+
+    });
+
+}
+
+
+/* ------------------------------
+   PLAY FAVORITE
+--------------------------------*/
+
+function playFav(fav) {
+
+    current = {
+
+        id: fav.tmdbId,
+
+        name: fav.title,
+
+        title: fav.title
+
+    };
+
+    typeSelect.value =
+        fav.type;
+
+    searchInput.value =
+        fav.title;
+
+    if (fav.type === "movie") {
+
+        tvSelector.style.display =
+            "none";
+
+        player.src =
+            buildMovieUrl(
+                fav.tmdbId
+            );
+
+    } else {
+
+        tvSelector.style.display =
+            "block";
+
+        loadTVSeasons();
+
+    }
+
+}
+
+
+/* ------------------------------
+   CLEAR FAVORITES
+--------------------------------*/
+
+clearFavs.onclick = () => {
+
+    if (
+        confirm(
+            "Clear all favorites?"
+        )
+    ) {
+
+        localStorage.removeItem(
+            FAV_KEY
+        );
+
+        loadFavs();
+
+    }
+
+};
+
+
+/* ------------------------------
+   DARK MODE
+--------------------------------*/
+
+darkModeBtn.onclick = () => {
+
+    document.body
+        .classList
+        .toggle("dark");
+
+};
+
+
+/* ------------------------------
+   RESET SELECTION WHEN TYPE CHANGES
+--------------------------------*/
+
+typeSelect.onchange = () => {
+
+    current = null;
+
+    results.innerHTML = "";
+
+    tvSelector.style.display =
+        "none";
+
+};
+
+
+/* ------------------------------
+   INITIALIZE
+--------------------------------*/
+
+loadFavs();
+
+</script>
+
+</body>
+</html>
+```
