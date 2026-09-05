@@ -1,65 +1,375 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Legendary TV</title>
 
 <style>
+
+* {
+    box-sizing: border-box;
+}
+
 body {
-    font-family: Arial;
-    background: #111;
+    margin: 0;
+    padding: 20px;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #090909;
     color: #eee;
     display: flex;
     gap: 20px;
-    padding: 20px;
+    min-height: 100vh;
 }
 
-body.dark {
-    background: #f5f5f5;
-    color: #222;
-}
+/* =========================
+   SIDEBAR
+========================= */
 
 aside {
-    width: 260px;
-    background: #1e1e1e;
-    padding: 15px;
-    border-radius: 10px;
+    width: 250px;
+    min-width: 250px;
+    background: #151515;
+    border: 1px solid #292929;
+    padding: 18px;
+    border-radius: 18px;
+    height: fit-content;
 }
 
-body.dark aside {
-    background: #ddd;
+aside h3 {
+    margin-top: 16px;
+    margin-bottom: 10px;
+}
+
+aside h3:first-child {
+    margin-top: 0;
 }
 
 ul {
     list-style: none;
     padding: 0;
+    margin: 0;
 }
 
 li {
-    padding: 8px;
-    margin-bottom: 6px;
-    background: #333;
-    border-radius: 6px;
+    padding: 10px 12px;
+    margin-bottom: 7px;
+    background: #222;
+    border-radius: 9px;
     cursor: pointer;
+    transition: 0.2s;
 }
 
-body.dark li {
-    background: #bbb;
+li:hover {
+    background: #303030;
 }
 
 button {
-    padding: 6px 12px;
-    margin-top: 8px;
-    border-radius: 6px;
+    padding: 9px 14px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    background: #292929;
+    color: white;
+    transition: 0.2s;
+}
+
+button:hover {
+    background: #3a3a3a;
+}
+
+/* =========================
+   MAIN PAGE
+========================= */
+
+#mainContent {
+    flex: 1;
+    max-width: 1100px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.topBar {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 16px;
+}
+
+/* =========================
+   SEARCH PANEL
+========================= */
+
+.searchPanel {
+    background: #0d0d0d;
+    border: 1px solid #333;
+    border-radius: 28px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+}
+
+.searchHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 25px 28px 18px;
+    gap: 20px;
+}
+
+.searchHeader h1 {
+    margin: 0;
+    font-size: 34px;
+}
+
+#typeSelect {
+    background: #242424;
+    color: #ccc;
+    border: 1px solid #444;
+    padding: 13px 18px;
+    border-radius: 30px;
+    font-size: 16px;
+    outline: none;
     cursor: pointer;
 }
 
-input,
-select {
-    padding: 6px;
-    margin-top: 8px;
-    border-radius: 6px;
+.searchBoxWrapper {
+    margin: 0 25px 20px;
+    position: relative;
 }
+
+.searchIcon {
+    position: absolute;
+    left: 25px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #777;
+    font-size: 25px;
+    pointer-events: none;
+}
+
+#searchInput {
+    width: 100%;
+    height: 74px;
+    border-radius: 28px;
+    border: 2px solid #3d3d3d;
+    outline: none;
+    background: #191919;
+    color: white;
+    font-size: 22px;
+    padding: 0 60px 0 68px;
+    transition: border-color 0.2s;
+}
+
+#searchInput:focus {
+    border-color: #666;
+}
+
+#searchInput::placeholder {
+    color: #777;
+}
+
+#clearSearch {
+    position: absolute;
+    right: 22px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    color: #777;
+    font-size: 25px;
+    padding: 5px 10px;
+}
+
+#clearSearch:hover {
+    color: white;
+    background: transparent;
+}
+
+/* =========================
+   SEARCH RESULTS
+========================= */
+
+#results {
+    max-height: 650px;
+    overflow-y: auto;
+    background: #111;
+}
+
+.result {
+    display: flex;
+    align-items: center;
+    min-height: 145px;
+    padding: 20px 30px;
+    border-top: 1px solid #242424;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.result:first-child {
+    border-top: none;
+}
+
+.result:hover {
+    background: #191919;
+}
+
+.poster {
+    width: 74px;
+    height: 110px;
+    object-fit: cover;
+    flex-shrink: 0;
+    border-radius: 12px;
+    background: #262626;
+}
+
+.posterPlaceholder {
+    width: 74px;
+    height: 110px;
+    flex-shrink: 0;
+    border-radius: 12px;
+    background: #252525;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #666;
+    font-size: 12px;
+    text-align: center;
+}
+
+.resultInfo {
+    margin-left: 24px;
+    flex: 1;
+    min-width: 0;
+}
+
+.resultTitle {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: #f5f5f5;
+}
+
+.resultMeta {
+    color: #777;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    line-height: 1.5;
+}
+
+.separator {
+    color: #444;
+}
+
+.rating {
+    color: #888;
+}
+
+.star {
+    color: #ffd000;
+}
+
+.resultArrow {
+    font-size: 32px;
+    color: #444;
+    margin-left: 15px;
+}
+
+.result:hover .resultArrow {
+    color: #aaa;
+}
+
+.searchMessage {
+    text-align: center;
+    padding: 35px;
+    color: #777;
+    font-size: 17px;
+}
+
+/* =========================
+   SELECTED CONTENT
+========================= */
+
+#selectedContent {
+    display: none;
+    margin-top: 18px;
+    padding: 16px 20px;
+    background: #161616;
+    border: 1px solid #292929;
+    border-radius: 14px;
+}
+
+#selectedContent strong {
+    color: white;
+}
+
+.actionButtons {
+    margin-top: 15px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.primaryButton {
+    background: #dc2626;
+}
+
+.primaryButton:hover {
+    background: #ef3333;
+}
+
+/* =========================
+   TV SELECTOR
+========================= */
+
+#tvSelector {
+    display: none;
+    margin-top: 20px;
+    padding: 20px;
+    background: #161616;
+    border: 1px solid #292929;
+    border-radius: 14px;
+}
+
+#tvSelector h3 {
+    margin-top: 0;
+}
+
+#tvSelector select,
+#playerOptions input[type="text"] {
+    background: #252525;
+    color: white;
+    border: 1px solid #444;
+    border-radius: 8px;
+    padding: 9px 12px;
+    margin-right: 8px;
+}
+
+/* =========================
+   PLAYER OPTIONS
+========================= */
+
+#playerOptions {
+    margin-top: 20px;
+    padding: 20px;
+    background: #161616;
+    border: 1px solid #292929;
+    border-radius: 14px;
+}
+
+#playerOptions h3 {
+    margin-top: 0;
+}
+
+.optionRow {
+    margin: 12px 0;
+}
+
+/* =========================
+   PLAYER
+========================= */
 
 #playerContainer {
     position: relative;
@@ -68,68 +378,78 @@ select {
     height: 0;
     margin-top: 20px;
     background: black;
+    border-radius: 15px;
+    overflow: hidden;
 }
 
 #player {
     position: absolute;
-    top: 0;
-    left: 0;
+    inset: 0;
     width: 100%;
     height: 100%;
     border: none;
-    background: black;
 }
 
-#results {
-    max-height: 200px;
-    overflow: auto;
-    margin-top: 8px;
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 800px) {
+
+    body {
+        display: block;
+        padding: 10px;
+    }
+
+    aside {
+        width: 100%;
+        margin-bottom: 15px;
+    }
+
+    .searchHeader {
+        padding: 20px;
+    }
+
+    .searchHeader h1 {
+        font-size: 28px;
+    }
+
+    #typeSelect {
+        max-width: 180px;
+    }
+
+    .result {
+        padding: 15px;
+        min-height: 120px;
+    }
+
+    .poster,
+    .posterPlaceholder {
+        width: 65px;
+        height: 96px;
+    }
+
+    .resultInfo {
+        margin-left: 15px;
+    }
+
+    .resultTitle {
+        font-size: 18px;
+    }
+
+    .resultMeta {
+        font-size: 14px;
+    }
 }
 
-.result {
-    padding: 6px;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.result:hover {
-    background: rgba(255,255,255,0.15);
-}
-
-#tvSelector {
-    display: none;
-    margin-top: 20px;
-    padding: 15px;
-    background: #222;
-    border-radius: 8px;
-}
-
-body.dark #tvSelector {
-    background: #ccc;
-}
-
-#playerOptions {
-    margin-top: 20px;
-    padding: 15px;
-    background: #222;
-    border-radius: 8px;
-}
-
-body.dark #playerOptions {
-    background: #ccc;
-}
-
-.optionRow {
-    margin-bottom: 8px;
-}
-
-.optionRow label {
-    margin-right: 10px;
-}
 </style>
 </head>
 
 <body>
+
+<!-- =========================
+     FAVORITES
+========================= -->
 
 <aside>
 
@@ -143,289 +463,995 @@ body.dark #playerOptions {
 
 </aside>
 
-<div style="flex:1">
 
-<button id="darkModeBtn">Toggle Dark Mode</button>
+<!-- =========================
+     MAIN CONTENT
+========================= -->
 
-<h2>Search</h2>
+<main id="mainContent">
 
-<select id="typeSelect">
-    <option value="movie">Movie</option>
-    <option value="tv">TV Show</option>
-</select>
+<div class="topBar">
+    <button id="darkModeBtn">Toggle Theme</button>
+</div>
 
-<input id="searchInput" placeholder="Search title">
-<button id="searchBtn">Search</button>
 
-<div id="results"></div>
+<!-- =========================
+     SEARCH
+========================= -->
 
-<button id="loadBtn">Load</button>
-<button id="favBtn">Add to Favorites</button>
+<div class="searchPanel">
+
+    <div class="searchHeader">
+
+        <h1>Search</h1>
+
+        <select id="typeSelect">
+
+            <option value="multi">
+                Movies & TV Shows
+            </option>
+
+            <option value="movie">
+                Movies
+            </option>
+
+            <option value="tv">
+                TV Shows
+            </option>
+
+        </select>
+
+    </div>
+
+
+    <div class="searchBoxWrapper">
+
+        <div class="searchIcon">
+            🔍
+        </div>
+
+        <input
+            id="searchInput"
+            type="text"
+            autocomplete="off"
+            placeholder="Search movies and TV shows"
+        >
+
+        <button
+            id="clearSearch"
+            title="Clear search"
+        >
+            ×
+        </button>
+
+    </div>
+
+    <div id="results"></div>
+
+</div>
+
+
+<!-- =========================
+     SELECTED ITEM
+========================= -->
+
+<div id="selectedContent">
+
+    Selected:
+    <strong id="selectedTitle"></strong>
+
+    <div class="actionButtons">
+
+        <button
+            id="loadBtn"
+            class="primaryButton"
+        >
+            ▶ Load
+        </button>
+
+        <button id="favBtn">
+            + Add to Favorites
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- =========================
+     TV SELECTOR
+========================= -->
 
 <div id="tvSelector">
+
     <h3 id="tvTitle"></h3>
 
+    <label>
+        Season
+    </label>
+
     <select id="seasonSelect"></select>
+
+    <label>
+        Episode
+    </label>
+
     <select id="episodeSelect"></select>
 
-    <button id="playEpisode">Play Episode</button>
+    <button
+        id="playEpisode"
+        class="primaryButton"
+    >
+        ▶ Play Episode
+    </button>
+
 </div>
+
+
+<!-- =========================
+     PLAYER OPTIONS
+========================= -->
 
 <div id="playerOptions">
 
-    <h3>Player Options</h3>
+<h3>Player Options</h3>
 
-    <div class="optionRow">
-        <label for="colorInput">Player Color:</label>
-        <input
-            id="colorInput"
-            type="text"
-            value="dc2626"
-            placeholder="dc2626"
-        >
-    </div>
+<div class="optionRow">
 
-    <div class="optionRow">
-        <label>
-            <input id="autoplayInput" type="checkbox">
-            Autoplay
-        </label>
-    </div>
+    <label for="colorInput">
+        Player Color
+    </label>
 
-    <div class="optionRow">
-        <label>
-            <input id="autonextInput" type="checkbox" checked>
-            Auto-next Episode
-        </label>
-    </div>
+    <input
+        id="colorInput"
+        type="text"
+        value="dc2626"
+        placeholder="dc2626"
+    >
 
 </div>
+
+<div class="optionRow">
+
+    <label>
+        <input
+            id="autoplayInput"
+            type="checkbox"
+        >
+
+        Autoplay
+    </label>
+
+</div>
+
+<div class="optionRow">
+
+    <label>
+
+        <input
+            id="autonextInput"
+            type="checkbox"
+            checked
+        >
+
+        Auto-next Episode
+
+    </label>
+
+</div>
+
+</div>
+
+
+<!-- =========================
+     PLAYER
+========================= -->
 
 <div id="playerContainer">
-    <iframe
-        id="player"
-        src=""
-        frameborder="0"
-        allowfullscreen
-        allow="encrypted-media"
-    ></iframe>
-</div>
+
+<iframe
+    id="player"
+    src=""
+    allowfullscreen
+    allow="encrypted-media"
+></iframe>
 
 </div>
+
+</main>
+
 
 <script>
 
-const TMDB_API_KEY = "a88916c7c4cb176a0f0caed0b298587a";
-const BASE = "https://api.themoviedb.org/3";
-const FAV_KEY = "tmdbPlayerFavs";
+/* =========================================================
+   CONFIGURATION
+========================================================= */
 
-const searchBtn = document.getElementById("searchBtn");
-const searchInput = document.getElementById("searchInput");
-const results = document.getElementById("results");
-const typeSelect = document.getElementById("typeSelect");
-const player = document.getElementById("player");
-const favBtn = document.getElementById("favBtn");
-const loadBtn = document.getElementById("loadBtn");
+const TMDB_API_KEY =
+    "a88916c7c4cb176a0f0caed0b298587a";
 
-const tvSelector = document.getElementById("tvSelector");
-const tvTitle = document.getElementById("tvTitle");
-const seasonSelect = document.getElementById("seasonSelect");
-const episodeSelect = document.getElementById("episodeSelect");
-const playEpisode = document.getElementById("playEpisode");
+const BASE =
+    "https://api.themoviedb.org/3";
 
-const movieFavs = document.getElementById("movieFavs");
-const tvFavs = document.getElementById("tvFavs");
-const clearFavs = document.getElementById("clearFavs");
+const IMAGE_BASE =
+    "https://image.tmdb.org/t/p/w185";
 
-const darkModeBtn = document.getElementById("darkModeBtn");
+const FAV_KEY =
+    "tmdbPlayerFavs";
 
-const colorInput = document.getElementById("colorInput");
-const autoplayInput = document.getElementById("autoplayInput");
-const autonextInput = document.getElementById("autonextInput");
+
+/* =========================================================
+   ELEMENTS
+========================================================= */
+
+const searchInput =
+    document.getElementById("searchInput");
+
+const typeSelect =
+    document.getElementById("typeSelect");
+
+const results =
+    document.getElementById("results");
+
+const clearSearch =
+    document.getElementById("clearSearch");
+
+const selectedContent =
+    document.getElementById("selectedContent");
+
+const selectedTitle =
+    document.getElementById("selectedTitle");
+
+const player =
+    document.getElementById("player");
+
+const loadBtn =
+    document.getElementById("loadBtn");
+
+const favBtn =
+    document.getElementById("favBtn");
+
+const tvSelector =
+    document.getElementById("tvSelector");
+
+const tvTitle =
+    document.getElementById("tvTitle");
+
+const seasonSelect =
+    document.getElementById("seasonSelect");
+
+const episodeSelect =
+    document.getElementById("episodeSelect");
+
+const playEpisode =
+    document.getElementById("playEpisode");
+
+const movieFavs =
+    document.getElementById("movieFavs");
+
+const tvFavs =
+    document.getElementById("tvFavs");
+
+const clearFavs =
+    document.getElementById("clearFavs");
+
+const colorInput =
+    document.getElementById("colorInput");
+
+const autoplayInput =
+    document.getElementById("autoplayInput");
+
+const autonextInput =
+    document.getElementById("autonextInput");
+
+const darkModeBtn =
+    document.getElementById("darkModeBtn");
+
 
 let current = null;
 
+let currentType = null;
 
-/* ------------------------------
-   TMDB API
---------------------------------*/
+let searchTimer = null;
 
-async function tmdb(endpoint) {
 
-    const separator = endpoint.includes("?") ? "&" : "?";
+/* =========================================================
+   GENRE DATA
+========================================================= */
 
-    const res = await fetch(
-        `${BASE}${endpoint}${separator}api_key=${TMDB_API_KEY}`
-    );
+let movieGenres = {};
+let tvGenres = {};
 
-    if (!res.ok) {
-        throw new Error("TMDb request failed");
+
+async function loadGenres() {
+
+    try {
+
+        const [movieData, tvData] =
+            await Promise.all([
+
+                tmdb("/genre/movie/list"),
+
+                tmdb("/genre/tv/list")
+
+            ]);
+
+
+        movieData.genres.forEach(genre => {
+
+            movieGenres[genre.id] =
+                genre.name;
+
+        });
+
+
+        tvData.genres.forEach(genre => {
+
+            tvGenres[genre.id] =
+                genre.name;
+
+        });
+
     }
 
-    return res.json();
+    catch (error) {
+
+        console.error(
+            "Could not load genres:",
+            error
+        );
+
+    }
+
 }
 
 
-/* ------------------------------
-   PLAYER URL
---------------------------------*/
+/* =========================================================
+   TMDB API
+========================================================= */
+
+async function tmdb(endpoint) {
+
+    const separator =
+        endpoint.includes("?")
+            ? "&"
+            : "?";
+
+
+    const response =
+        await fetch(
+
+            `${BASE}${endpoint}${separator}api_key=${TMDB_API_KEY}`
+
+        );
+
+
+    if (!response.ok) {
+
+        throw new Error(
+            "TMDb API request failed"
+        );
+
+    }
+
+
+    return response.json();
+
+}
+
+
+/* =========================================================
+   PLAYER URL OPTIONS
+========================================================= */
 
 function getPlayerParams() {
 
-    const params = new URLSearchParams();
+    const params =
+        new URLSearchParams();
 
-    const color = colorInput.value.trim();
+
+    const color =
+        colorInput.value.trim();
+
 
     if (color) {
+
         params.set(
+
             "color",
+
             color.replace("#", "")
+
         );
+
     }
 
-    params.set(
-        "autoplay",
-        autoplayInput.checked ? "1" : "0"
-    );
 
     params.set(
-        "autonext",
-        autonextInput.checked ? "1" : "0"
+
+        "autoplay",
+
+        autoplayInput.checked
+            ? "1"
+            : "0"
+
     );
+
+
+    params.set(
+
+        "autonext",
+
+        autonextInput.checked
+            ? "1"
+            : "0"
+
+    );
+
 
     return params.toString();
+
 }
 
 
 function buildMovieUrl(tmdbId) {
 
-    const params = getPlayerParams();
+    return (
 
-    return `https://1embed.cc/embed/movie/${encodeURIComponent(tmdbId)}?${params}`;
+        `https://1embed.cc/embed/movie/` +
+
+        `${encodeURIComponent(tmdbId)}` +
+
+        `?${getPlayerParams()}`
+
+    );
+
 }
 
 
-function buildTvUrl(tmdbId, season, episode) {
+function buildTvUrl(
+    tmdbId,
+    season,
+    episode
+) {
 
-    const params = getPlayerParams();
+    return (
 
-    return `https://1embed.cc/embed/tv/${encodeURIComponent(tmdbId)}/${encodeURIComponent(season)}/${encodeURIComponent(episode)}?${params}`;
+        `https://1embed.cc/embed/tv/` +
+
+        `${encodeURIComponent(tmdbId)}/` +
+
+        `${encodeURIComponent(season)}/` +
+
+        `${encodeURIComponent(episode)}` +
+
+        `?${getPlayerParams()}`
+
+    );
+
 }
 
 
-/* ------------------------------
-   SEARCH
---------------------------------*/
+/* =========================================================
+   LIVE SEARCH
+========================================================= */
 
-searchBtn.onclick = async () => {
+searchInput.addEventListener(
 
-    results.innerHTML = "";
+    "input",
 
-    const query = searchInput.value.trim();
+    () => {
+
+        clearTimeout(searchTimer);
+
+
+        const query =
+            searchInput.value.trim();
+
+
+        if (!query) {
+
+            results.innerHTML = "";
+
+            return;
+
+        }
+
+
+        results.innerHTML =
+
+            `<div class="searchMessage">
+                Searching...
+            </div>`;
+
+
+        searchTimer =
+            setTimeout(
+
+                runSearch,
+
+                350
+
+            );
+
+    }
+
+);
+
+
+typeSelect.addEventListener(
+
+    "change",
+
+    () => {
+
+        if (
+            searchInput.value.trim()
+        ) {
+
+            runSearch();
+
+        }
+
+    }
+
+);
+
+
+async function runSearch() {
+
+    const query =
+        searchInput.value.trim();
+
 
     if (!query) {
+
+        results.innerHTML = "";
+
         return;
+
     }
+
 
     try {
 
-        const data = await tmdb(
-            `/search/${typeSelect.value}?query=${encodeURIComponent(query)}`
-        );
+        let endpoint;
 
-        if (!data.results || data.results.length === 0) {
 
-            results.textContent = "No results found.";
+        if (
+            typeSelect.value === "multi"
+        ) {
 
-            return;
+            endpoint =
+
+                `/search/multi?query=${encodeURIComponent(query)}`;
+
         }
 
-        data.results.forEach(item => {
+        else {
 
-            const div = document.createElement("div");
+            endpoint =
 
-            div.className = "result";
+                `/search/${typeSelect.value}?query=${encodeURIComponent(query)}`;
 
-            const title = item.title || item.name || "Untitled";
+        }
 
-            const year =
-                (item.release_date || item.first_air_date || "")
-                .slice(0, 4);
 
-            div.textContent =
-                year
-                ? `${title} (${year})`
-                : title;
+        const data =
+            await tmdb(endpoint);
 
-            div.onclick = () => selectItem(item);
 
-            results.appendChild(div);
+        let items =
+            data.results || [];
 
-        });
 
-    } catch (error) {
+        /*
+         * Multi-search can also return people.
+         * Only keep movie and TV results.
+         */
+
+        items =
+            items.filter(item => {
+
+                if (
+                    typeSelect.value !== "multi"
+                ) {
+
+                    return true;
+
+                }
+
+
+                return (
+
+                    item.media_type === "movie" ||
+                    item.media_type === "tv"
+
+                );
+
+            });
+
+
+        if (!items.length) {
+
+            results.innerHTML =
+
+                `<div class="searchMessage">
+                    No movies or TV shows found.
+                </div>`;
+
+            return;
+
+        }
+
+
+        renderResults(
+            items.slice(0, 15)
+        );
+
+    }
+
+    catch (error) {
 
         console.error(error);
 
-        results.textContent = "Search failed.";
+
+        results.innerHTML =
+
+            `<div class="searchMessage">
+                Search failed.
+            </div>`;
 
     }
 
-};
+}
 
 
-/* Press Enter to Search */
+/* =========================================================
+   RENDER SEARCH RESULTS
+========================================================= */
 
-searchInput.addEventListener("keydown", event => {
-
-    if (event.key === "Enter") {
-        searchBtn.click();
-    }
-
-});
-
-
-/* ------------------------------
-   SELECT SEARCH RESULT
---------------------------------*/
-
-function selectItem(item) {
-
-    current = item;
+function renderResults(items) {
 
     results.innerHTML = "";
 
-    tvSelector.style.display = "none";
+
+    items.forEach(item => {
+
+        const mediaType =
+            getMediaType(item);
+
+
+        const title =
+
+            item.title ||
+            item.name ||
+            "Untitled";
+
+
+        const date =
+
+            item.release_date ||
+            item.first_air_date ||
+            "";
+
+
+        const year =
+
+            date
+                ? date.substring(0,4)
+                : "—";
+
+
+        const rating =
+
+            typeof item.vote_average === "number"
+
+                ? item.vote_average.toFixed(1)
+
+                : "—";
+
+
+        const genreMap =
+
+            mediaType === "movie"
+
+                ? movieGenres
+
+                : tvGenres;
+
+
+        const genres =
+
+            (item.genre_ids || [])
+
+            .slice(0,3)
+
+            .map(id => genreMap[id])
+
+            .filter(Boolean)
+
+            .join(", ");
+
+
+        const row =
+            document.createElement("div");
+
+
+        row.className =
+            "result";
+
+
+        /* Poster */
+
+        let poster;
+
+
+        if (item.poster_path) {
+
+            poster =
+                document.createElement("img");
+
+            poster.className =
+                "poster";
+
+            poster.src =
+                IMAGE_BASE +
+                item.poster_path;
+
+            poster.alt =
+                title;
+
+            poster.loading =
+                "lazy";
+
+        }
+
+        else {
+
+            poster =
+                document.createElement("div");
+
+            poster.className =
+                "posterPlaceholder";
+
+            poster.textContent =
+                "No Poster";
+
+        }
+
+
+        /* Info */
+
+        const info =
+            document.createElement("div");
+
+
+        info.className =
+            "resultInfo";
+
+
+        const titleElement =
+            document.createElement("div");
+
+
+        titleElement.className =
+            "resultTitle";
+
+
+        titleElement.textContent =
+            title;
+
+
+        const metadata =
+            document.createElement("div");
+
+
+        metadata.className =
+            "resultMeta";
+
+
+        const typeText =
+
+            mediaType === "movie"
+
+                ? "Movie"
+
+                : "TV Show";
+
+
+        metadata.innerHTML = `
+
+            <span>${typeText}</span>
+
+            <span class="separator">|</span>
+
+            <span>${year}</span>
+
+            <span class="separator">|</span>
+
+            <span class="rating">
+
+                <span class="star">★</span>
+                ${rating}
+
+            </span>
+
+            ${
+                genres
+                ? `
+                    <span class="separator">|</span>
+                    <span>${genres}</span>
+                  `
+                : ""
+            }
+
+        `;
+
+
+        info.appendChild(
+            titleElement
+        );
+
+
+        info.appendChild(
+            metadata
+        );
+
+
+        /* Arrow */
+
+        const arrow =
+            document.createElement("div");
+
+
+        arrow.className =
+            "resultArrow";
+
+
+        arrow.textContent =
+            "›";
+
+
+        row.appendChild(
+            poster
+        );
+
+
+        row.appendChild(
+            info
+        );
+
+
+        row.appendChild(
+            arrow
+        );
+
+
+        row.onclick = () => {
+
+            selectItem(
+                item,
+                mediaType
+            );
+
+        };
+
+
+        results.appendChild(
+            row
+        );
+
+    });
+
+}
+
+
+/* =========================================================
+   GET CONTENT TYPE
+========================================================= */
+
+function getMediaType(item) {
+
+    if (item.media_type) {
+
+        return item.media_type;
+
+    }
+
+
+    return typeSelect.value;
+
+}
+
+
+/* =========================================================
+   SELECT RESULT
+========================================================= */
+
+function selectItem(
+    item,
+    mediaType
+) {
+
+    current =
+        item;
+
+
+    currentType =
+        mediaType;
+
+
+    selectedTitle.textContent =
+
+        item.title ||
+        item.name ||
+        "Untitled";
+
+
+    selectedContent.style.display =
+        "block";
+
+
+    tvSelector.style.display =
+        "none";
+
+
+    /*
+     * Keep selected title in the search bar,
+     * similar to selecting a result in an app.
+     */
 
     searchInput.value =
+
         item.title ||
         item.name ||
         "";
 
+
+    results.innerHTML = "";
+
 }
 
 
-/* ------------------------------
-   LOAD MOVIE / TV SHOW
---------------------------------*/
+/* =========================================================
+   LOAD SELECTED CONTENT
+========================================================= */
 
 loadBtn.onclick = () => {
 
     if (!current) {
 
-        alert("Search and select something first.");
+        alert(
+            "Search and select something first."
+        );
 
         return;
 
     }
 
-    if (typeSelect.value === "movie") {
 
-        player.src = buildMovieUrl(current.id);
+    if (
+        currentType === "movie"
+    ) {
 
-    } else {
+        tvSelector.style.display =
+            "none";
 
-        tvSelector.style.display = "block";
+
+        player.src =
+
+            buildMovieUrl(
+                current.id
+            );
+
+    }
+
+    else {
+
+        tvSelector.style.display =
+            "block";
+
 
         loadTVSeasons();
 
@@ -434,42 +1460,76 @@ loadBtn.onclick = () => {
 };
 
 
-/* ------------------------------
-   LOAD TV SEASONS
---------------------------------*/
+/* =========================================================
+   TV SEASONS
+========================================================= */
 
 async function loadTVSeasons() {
 
     if (!current) {
+
         return;
+
     }
 
+
     tvTitle.textContent =
+
         current.name ||
         current.title ||
         "TV Show";
 
+
     try {
 
-        const data = await tmdb(`/tv/${current.id}`);
+        const data =
 
-        seasonSelect.innerHTML = "";
+            await tmdb(
+                `/tv/${current.id}`
+            );
 
-        const seasons = data.seasons
-            .filter(season => season.season_number > 0);
 
-        seasons.forEach(season => {
+        seasonSelect.innerHTML =
+            "";
 
-            const option = document.createElement("option");
 
-            option.value = season.season_number;
+        const seasons =
 
-            option.textContent =
-                "Season " + season.season_number;
+            (data.seasons || [])
 
-            seasonSelect.appendChild(option);
+            .filter(
 
-        });
+                season =>
+                    season.season_number > 0
+
+            );
+
+
+        seasons.forEach(
+            season => {
+
+                const option =
+                    document.createElement(
+                        "option"
+                    );
+
+
+                option.value =
+                    season.season_number;
+
+
+                option.textContent =
+                    "Season " +
+                    season.season_number;
+
+
+                seasonSelect.appendChild(
+                    option
+                );
+
+            }
+        );
+
 
         if (seasons.length) {
 
@@ -477,133 +1537,211 @@ async function loadTVSeasons() {
 
         }
 
-    } catch (error) {
+    }
+
+    catch (error) {
 
         console.error(error);
 
-        alert("Could not load seasons.");
+
+        alert(
+            "Could not load seasons."
+        );
 
     }
 
 }
 
 
-/* ------------------------------
-   LOAD EPISODES
---------------------------------*/
+/* =========================================================
+   EPISODES
+========================================================= */
 
-seasonSelect.onchange = loadEpisodes;
+seasonSelect.addEventListener(
+
+    "change",
+
+    loadEpisodes
+
+);
 
 
 async function loadEpisodes() {
 
     if (!current) {
+
         return;
+
     }
 
-    const season = seasonSelect.value;
+
+    const season =
+        seasonSelect.value;
+
 
     try {
 
-        const data = await tmdb(
-            `/tv/${current.id}/season/${season}`
+        const data =
+
+            await tmdb(
+
+                `/tv/${current.id}/season/${season}`
+
+            );
+
+
+        episodeSelect.innerHTML =
+            "";
+
+
+        (data.episodes || [])
+        .forEach(
+
+            episode => {
+
+                const option =
+                    document.createElement(
+                        "option"
+                    );
+
+
+                option.value =
+                    episode.episode_number;
+
+
+                option.textContent =
+
+                    `E${episode.episode_number} - ${episode.name}`;
+
+
+                episodeSelect.appendChild(
+                    option
+                );
+
+            }
+
         );
 
-        episodeSelect.innerHTML = "";
+    }
 
-        data.episodes.forEach(episode => {
-
-            const option =
-                document.createElement("option");
-
-            option.value =
-                episode.episode_number;
-
-            option.textContent =
-                `E${episode.episode_number} - ${episode.name}`;
-
-            episodeSelect.appendChild(option);
-
-        });
-
-    } catch (error) {
+    catch (error) {
 
         console.error(error);
 
-        alert("Could not load episodes.");
+
+        alert(
+            "Could not load episodes."
+        );
 
     }
 
 }
 
 
-/* ------------------------------
-   PLAY EPISODE
---------------------------------*/
+/* =========================================================
+   PLAY TV EPISODE
+========================================================= */
 
 playEpisode.onclick = () => {
 
     if (!current) {
-        return;
-    }
-
-    const season = seasonSelect.value;
-    const episode = episodeSelect.value;
-
-    if (!season || !episode) {
-
-        alert("Select a season and episode.");
 
         return;
 
     }
 
-    player.src = buildTvUrl(
-        current.id,
-        season,
-        episode
-    );
+
+    const season =
+        seasonSelect.value;
+
+
+    const episode =
+        episodeSelect.value;
+
+
+    if (
+        !season ||
+        !episode
+    ) {
+
+        alert(
+            "Select a season and episode."
+        );
+
+        return;
+
+    }
+
+
+    player.src =
+
+        buildTvUrl(
+
+            current.id,
+
+            season,
+
+            episode
+
+        );
 
 };
 
 
-/* ------------------------------
+/* =========================================================
    FAVORITES
---------------------------------*/
+========================================================= */
 
 favBtn.onclick = () => {
 
-    if (!current) {
-
-        alert("Search and select something first.");
+    if (
+        !current ||
+        !currentType
+    ) {
 
         return;
 
     }
 
+
     const favs =
+
         JSON.parse(
-            localStorage.getItem(FAV_KEY)
+            localStorage.getItem(
+                FAV_KEY
+            )
         ) || [];
 
-    const exists = favs.some(f =>
-        f.type === typeSelect.value &&
-        Number(f.tmdbId) === Number(current.id)
-    );
+
+    const exists =
+        favs.some(fav =>
+
+            fav.type === currentType &&
+
+            Number(fav.tmdbId) ===
+            Number(current.id)
+
+        );
+
 
     if (exists) {
 
-        alert("Already added.");
+        alert(
+            "Already in favorites."
+        );
 
         return;
 
     }
 
+
     favs.push({
 
-        type: typeSelect.value,
+        type:
+            currentType,
 
         title:
+
             current.title ||
             current.name,
 
@@ -612,48 +1750,75 @@ favBtn.onclick = () => {
 
     });
 
+
     localStorage.setItem(
+
         FAV_KEY,
+
         JSON.stringify(favs)
+
     );
+
 
     loadFavs();
 
 };
 
 
-/* ------------------------------
+/* =========================================================
    DISPLAY FAVORITES
---------------------------------*/
+========================================================= */
 
 function loadFavs() {
 
     const favs =
+
         JSON.parse(
-            localStorage.getItem(FAV_KEY)
+            localStorage.getItem(
+                FAV_KEY
+            )
         ) || [];
 
-    movieFavs.innerHTML = "";
-    tvFavs.innerHTML = "";
+
+    movieFavs.innerHTML =
+        "";
+
+
+    tvFavs.innerHTML =
+        "";
+
 
     favs.forEach(fav => {
 
         const li =
-            document.createElement("li");
+            document.createElement(
+                "li"
+            );
+
 
         li.textContent =
             fav.title;
 
+
         li.onclick =
             () => playFav(fav);
 
-        if (fav.type === "movie") {
 
-            movieFavs.appendChild(li);
+        if (
+            fav.type === "movie"
+        ) {
 
-        } else {
+            movieFavs.appendChild(
+                li
+            );
 
-            tvFavs.appendChild(li);
+        }
+
+        else {
+
+            tvFavs.appendChild(
+                li
+            );
 
         }
 
@@ -662,42 +1827,63 @@ function loadFavs() {
 }
 
 
-/* ------------------------------
+/* =========================================================
    PLAY FAVORITE
---------------------------------*/
+========================================================= */
 
 function playFav(fav) {
 
     current = {
 
-        id: fav.tmdbId,
+        id:
+            fav.tmdbId,
 
-        name: fav.title,
+        title:
+            fav.title,
 
-        title: fav.title
+        name:
+            fav.title
 
     };
 
-    typeSelect.value =
+
+    currentType =
         fav.type;
+
+
+    selectedTitle.textContent =
+        fav.title;
+
+
+    selectedContent.style.display =
+        "block";
+
 
     searchInput.value =
         fav.title;
 
-    if (fav.type === "movie") {
+
+    if (
+        fav.type === "movie"
+    ) {
 
         tvSelector.style.display =
             "none";
 
+
         player.src =
+
             buildMovieUrl(
                 fav.tmdbId
             );
 
-    } else {
+    }
+
+    else {
 
         tvSelector.style.display =
             "block";
+
 
         loadTVSeasons();
 
@@ -706,21 +1892,24 @@ function playFav(fav) {
 }
 
 
-/* ------------------------------
+/* =========================================================
    CLEAR FAVORITES
---------------------------------*/
+========================================================= */
 
 clearFavs.onclick = () => {
 
     if (
+
         confirm(
             "Clear all favorites?"
         )
+
     ) {
 
         localStorage.removeItem(
             FAV_KEY
         );
+
 
         loadFavs();
 
@@ -729,43 +1918,59 @@ clearFavs.onclick = () => {
 };
 
 
-/* ------------------------------
-   DARK MODE
---------------------------------*/
+/* =========================================================
+   CLEAR SEARCH
+========================================================= */
+
+clearSearch.onclick = () => {
+
+    searchInput.value =
+        "";
+
+
+    results.innerHTML =
+        "";
+
+
+    searchInput.focus();
+
+};
+
+
+/* =========================================================
+   THEME
+========================================================= */
 
 darkModeBtn.onclick = () => {
 
-    document.body
-        .classList
-        .toggle("dark");
+    /*
+     * This version is intentionally dark-first,
+     * matching the reference design.
+     */
+
+    document.body.classList.toggle(
+        "lightMode"
+    );
 
 };
 
 
-/* ------------------------------
-   RESET SELECTION WHEN TYPE CHANGES
---------------------------------*/
-
-typeSelect.onchange = () => {
-
-    current = null;
-
-    results.innerHTML = "";
-
-    tvSelector.style.display =
-        "none";
-
-};
-
-
-/* ------------------------------
+/* =========================================================
    INITIALIZE
---------------------------------*/
+========================================================= */
 
-loadFavs();
+async function initialize() {
+
+    await loadGenres();
+
+    loadFavs();
+
+}
+
+
+initialize();
 
 </script>
 
 </body>
 </html>
-```
